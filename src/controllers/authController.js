@@ -1,5 +1,4 @@
 import bcrypt from "bcrypt";
-import { defineConfig } from "prisma/config";
 import prisma from "../prisma.js";
 
 
@@ -35,29 +34,76 @@ export const registerUser = async (req, res) => {
       data: {
         name,
         first_name,
-        phone,
+        phone: phone || null,
         email,
         password: hashedPassword,
-        address,
+        address: address || null,
         role,
       },
     });
 
-    console.log("New user created:", newUser);
+    console.log("New user created:", newUser.user_id);
+
+    const { password: _, ...userWithoutPassword } = newUser;
 
     return res.status(201).json({
       message: "User registered successfully",
-      userId: newUser.user_id,
+      user: userWithoutPassword,
     });
+
   } catch (err) {
     console.error("Error in registerUser:", err);
-    return res.status(500).json({ message: "Internal server error" });
+
+    if (err.code === 'P2002') {
+      return res.status(409).json({
+        message: "Un utilisateur avec cet email existe déjà"
+      });
+    }
+
+    return res.status(500).json({
+      message: "Erreur serveur interne",
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 };
 
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-export const loginUser = (req, res) => {
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email et mot de passe requis" });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (!user) {
+      return res.status(401).json({ message: "Identifiants invalides" });
+    }
+
+    // Vérifier le mot de passe
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Identifiants invalides" });
+    }
+
+    // TODO: Générer un token JWT ici
+    const { password: _, ...userWithoutPassword } = user;
+
+    return res.status(200).json({
+      message: "Connexion réussie",
+      user: userWithoutPassword,
+    });
+
+  } catch (err) {
+    console.error("Error in loginUser:", err);
+    return res.status(500).json({ message: "Erreur serveur interne" });
+  }
 };
 
 export const logoutUser = (req, res) => {
+  return res.status(200).json({ message: "Déconnexion réussie" });
 };
