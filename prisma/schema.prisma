@@ -8,23 +8,22 @@ datasource db {
 }
 
 model User {
-  user_id    Int     @id @default(autoincrement())
-  name       String
-  first_name String
-  email      String  @unique
-  phone      String?
-  password   String
-  address    String?
-  role       String
-
+  user_id       Int          @id @default(autoincrement())
+  name          String
+  first_name    String
+  email         String       @unique
+  phone         String?
+  password      String
+  address       String?
+  role          String
   animals       Animal[]     @relation("OwnedAnimals")
-  visits        Visit[]      @relation("OwnerVisits")
-  medicalVisits Visit[]      @relation("MedicalVisits")
   userAnimals   UserAnimal[]
+  medicalVisits Visit[]      @relation("MedicalVisits")
+  visits        Visit[]      @relation("OwnerVisits")
 }
 
 model Animal {
-  animal_id     Int      @id @default(autoincrement())
+  animal_id     Int              @id @default(autoincrement())
   name          String
   sex           String
   date_of_birth DateTime
@@ -35,59 +34,53 @@ model Animal {
   sterilizes    Boolean
   chip_number   Int
   photo         String?
-
-  owner_id Int
-  owner    User @relation("OwnedAnimals", fields: [owner_id], references: [user_id])
-
-  users      UserAnimal[]
-  treatments TreatmentVisit[]
+  owner_id      Int
+  owner         User             @relation("OwnedAnimals", fields: [owner_id], references: [user_id])
+  treatments    TreatmentVisit[]
+  users         UserAnimal[]
 }
 
 model UserAnimal {
-  id        Int @id @default(autoincrement())
+  id        Int    @id @default(autoincrement())
   user_id   Int
   animal_id Int
-
-  user   User   @relation(fields: [user_id], references: [user_id])
-  animal Animal @relation(fields: [animal_id], references: [animal_id])
+  animal    Animal @relation(fields: [animal_id], references: [animal_id])
+  user      User   @relation(fields: [user_id], references: [user_id])
 
   @@unique([user_id, animal_id])
 }
 
 model Treatment {
-  treatment_id Int      @id @default(autoincrement())
+  treatment_id Int              @id @default(autoincrement())
   name         String
   date_start   DateTime
   date_end     DateTime
   reason       String
   comments     String?
-
-  visits TreatmentVisit[]
+  visits       TreatmentVisit[]
 }
 
 model Visit {
-  visit_id        Int      @id @default(autoincrement())
+  visit_id        Int              @id @default(autoincrement())
   user_id         Int
   medical_team_id Int
   date            DateTime
   reason          String
   comments        String?
   diagnosis       String?
-
-  user        User             @relation("OwnerVisits", fields: [user_id], references: [user_id])
-  medicalTeam User             @relation("MedicalVisits", fields: [medical_team_id], references: [user_id])
-  treatments  TreatmentVisit[]
+  treatments      TreatmentVisit[]
+  medicalTeam     User             @relation("MedicalVisits", fields: [medical_team_id], references: [user_id])
+  user            User             @relation("OwnerVisits", fields: [user_id], references: [user_id])
 }
 
 model TreatmentVisit {
-  id           Int @id @default(autoincrement())
-  treatment_id Int
-  visit_id     Int
-
+  id              Int       @id @default(autoincrement())
+  treatment_id    Int
+  visit_id        Int
+  animalAnimal_id Int?
+  animal          Animal?   @relation(fields: [animalAnimal_id], references: [animal_id])
   treatment       Treatment @relation(fields: [treatment_id], references: [treatment_id])
   visit           Visit     @relation(fields: [visit_id], references: [visit_id])
-  animal          Animal?   @relation(fields: [animalAnimal_id], references: [animal_id])
-  animalAnimal_id Int?
 
   @@unique([treatment_id, visit_id])
 }
