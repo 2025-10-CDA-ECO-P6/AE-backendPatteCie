@@ -1,100 +1,86 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-model Owner {
-  owner_id   Int      @id @default(autoincrement())
-  UUID       Int
-  name       String   @db.VarChar(50)
-  first_name String   @db.VarChar(50)
-  phone      Int
-  email      String   @db.VarChar(100)
-  adress     String   @db.VarChar(255)
-  
-  animals    Animal[]
-
-  @@map("owner")
+model User {
+  user_id       Int          @id @default(autoincrement())
+  name          String
+  first_name    String
+  email         String       @unique
+  phone         String?
+  password      String
+  address       String?
+  role          String
+  animals       Animal[]     @relation("OwnedAnimals")
+  userAnimals   UserAnimal[]
+  medicalVisits Visit[]      @relation("MedicalVisits")
+  visits        Visit[]      @relation("OwnerVisits")
 }
 
 model Animal {
-  animal_id    Int      @id @default(autoincrement())
-  name         String   @db.VarChar(50)
-  sex          String   @db.Char(1)
-  date_of_birth DateTime @db.Date
-  species      String   @db.VarChar(50)
-  race         String   @db.VarChar(50)
-  weight_kg    Int
-  color        String   @db.VarChar(50)
-  sterilizes   Boolean
-  chip_number  Int
-  photo        String   @db.VarChar(255)
-  owner_id     Int
-  
-  owner        Owner    @relation(fields: [owner_id], references: [owner_id])
-  visits       Visit[]
-
-  @@map("animal")
+  animal_id     Int              @id @default(autoincrement())
+  name          String
+  sex           String
+  date_of_birth DateTime
+  species       String
+  race          String
+  weight_kg     Float
+  color         String
+  sterilizes    Boolean
+  chip_number   Int
+  photo         String?
+  owner_id      Int
+  owner         User             @relation("OwnedAnimals", fields: [owner_id], references: [user_id])
+  treatments    TreatmentVisit[]
+  users         UserAnimal[]
 }
 
-model Visit {
-  visit_id          Int       @id @default(autoincrement())
-  date              DateTime
-  reason            String    @db.VarChar(200)
-  comments          String    @db.Text
-  animal_id         Int
-  medical_team_id   Int
-  treatment_id      Int
-  
-  animal            Animal         @relation(fields: [animal_id], references: [animal_id])
-  medical_team      MedicalTeam    @relation(fields: [medical_team_id], references: [medical_team_id])
-  treatment         Treatment      @relation(fields: [treatment_id], references: [treatment_id])
-  treatmentVisits          TreatmentVisit[]
+model UserAnimal {
+  id        Int    @id @default(autoincrement())
+  user_id   Int
+  animal_id Int
+  animal    Animal @relation(fields: [animal_id], references: [animal_id])
+  user      User   @relation(fields: [user_id], references: [user_id])
 
-  @@map("visit")
+  @@unique([user_id, animal_id])
 }
 
 model Treatment {
-  treatment_id Int       @id @default(autoincrement())
-  name         String    @db.VarChar(50)
-  date_start   DateTime  @db.Date
-  date_end     DateTime  @db.Date
-  reason       String    @db.Text
-  comments     String    @db.Text
-  
-  visits       Visit[]
-  treatmentVisits     TreatmentVisit[]
-
-  @@map("treatment")
+  treatment_id Int              @id @default(autoincrement())
+  name         String
+  date_start   DateTime
+  date_end     DateTime
+  reason       String
+  comments     String?
+  visits       TreatmentVisit[]
 }
 
-model MedicalTeam {
-  medical_team_id Int      @id @default(autoincrement())
-  UUID            Int
-  name            String   @db.VarChar(50)
-  first_name      String   @db.VarChar(50)
-  email           String   @db.VarChar(100)
-  phone           Int
-  role            String   @db.VarChar(100)
-  
-  visits          Visit[]
-
-  @@map("medical_team")
+model Visit {
+  visit_id        Int              @id @default(autoincrement())
+  user_id         Int
+  medical_team_id Int
+  date            DateTime
+  reason          String
+  comments        String?
+  diagnosis       String?
+  treatments      TreatmentVisit[]
+  medicalTeam     User             @relation("MedicalVisits", fields: [medical_team_id], references: [user_id])
+  user            User             @relation("OwnerVisits", fields: [user_id], references: [user_id])
 }
 
 model TreatmentVisit {
-  include_id   Int @id @default(autoincrement())
-  visit_id     Int
-  treatment_id Int
-  
-  visit        Visit     @relation(fields: [visit_id], references: [visit_id])
-  treatment    Treatment @relation(fields: [treatment_id], references: [treatment_id])
+  id              Int       @id @default(autoincrement())
+  treatment_id    Int
+  visit_id        Int
+  animalAnimal_id Int?
+  animal          Animal?   @relation(fields: [animalAnimal_id], references: [animal_id])
+  treatment       Treatment @relation(fields: [treatment_id], references: [treatment_id])
+  visit           Visit     @relation(fields: [visit_id], references: [visit_id])
 
-  @@map("treatmentVisite")
+  @@unique([treatment_id, visit_id])
 }
