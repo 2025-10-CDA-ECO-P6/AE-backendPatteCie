@@ -1,7 +1,9 @@
 -- createTable.sql
 
+-- Activer l'extension pour UUID
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
+-- TABLE USER
 CREATE TABLE "user" (
     user_id SERIAL PRIMARY KEY,
     uuid UUID DEFAULT gen_random_uuid(),
@@ -15,6 +17,7 @@ CREATE TABLE "user" (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- TABLE ANIMAL
 CREATE TABLE animal (
     animal_id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
@@ -26,19 +29,17 @@ CREATE TABLE animal (
     color VARCHAR(50) NOT NULL,
     sterilizes BOOLEAN NOT NULL,
     chip_number INTEGER NOT NULL,
-    photo VARCHAR(255) NOT NULL,
-    owner_id INTEGER NOT NULL,
-    FOREIGN KEY (owner_id) REFERENCES "user"(user_id) ON DELETE CASCADE
+    photo VARCHAR(255) NOT NULL
 );
 
+-- TABLE USER_ANIMAL
 CREATE TABLE user_animal (
     user_animal_id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    animal_id INTEGER NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES "user"(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (animal_id) REFERENCES animal(animal_id) ON DELETE CASCADE
+    user_id INTEGER NOT NULL REFERENCES "user"(user_id) ON DELETE CASCADE,
+    animal_id INTEGER NOT NULL REFERENCES animal(animal_id) ON DELETE CASCADE
 );
 
+-- TABLE TREATMENT
 CREATE TABLE treatment (
     treatment_id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
@@ -48,24 +49,20 @@ CREATE TABLE treatment (
     comments TEXT NOT NULL
 );
 
+-- TABLE VISIT
 CREATE TABLE visit (
     visit_id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL REFERENCES "user"(user_id) ON DELETE CASCADE,
     date TIMESTAMP NOT NULL,
     reason VARCHAR(200) NOT NULL,
     comments TEXT NOT NULL,
     diagnosis TEXT,
-    medical_team_id INTEGER NOT NULL,
-    treatment_id INTEGER NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES "user"(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (medical_team_id) REFERENCES "user"(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (treatment_id) REFERENCES treatment(treatment_id) ON DELETE CASCADE
+    treatment_id INTEGER NOT NULL REFERENCES treatment(treatment_id) ON DELETE CASCADE
 );
 
+-- TABLE TREATMENT_VISIT
 CREATE TABLE treatment_visit (
     treatment_visit_id SERIAL PRIMARY KEY,
-    visit_id INTEGER NOT NULL,
-    treatment_id INTEGER NOT NULL,
-    FOREIGN KEY (visit_id) REFERENCES visit(visit_id) ON DELETE CASCADE,
-    FOREIGN KEY (treatment_id) REFERENCES treatment(treatment_id) ON DELETE CASCADE
+    visit_id INTEGER NOT NULL REFERENCES visit(visit_id) ON DELETE CASCADE,
+    treatment_id INTEGER NOT NULL REFERENCES treatment(treatment_id) ON DELETE CASCADE
 );
