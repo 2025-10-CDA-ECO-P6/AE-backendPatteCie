@@ -35,7 +35,7 @@ export const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Création utilisateur
-    const User = await prisma.User.create({
+    const user = await prisma.User.create({
       data: {
         name,
         first_name,
@@ -48,11 +48,11 @@ export const registerUser = async (req, res) => {
     });
 
     // Réponse sans le mot de passe
-    const { password: _, ...userWithoutPassword } = User;
+    const { password: _, ...userWithoutPassword } = user;
 
     return res.status(201).json({
       message: "Utilisateur créé avec succès",
-      User: userWithoutPassword,
+      user: userWithoutPassword,
     });
 
   } catch (error) {
@@ -79,27 +79,27 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Email et mot de passe requis" });
     }
 
-    const User = await prisma.user.findUnique({
+    const user = await prisma.User.findUnique({
       where: { email }
     });
 
-    if (!User) {
+    if (!user) {
       return res.status(401).json({ message: "Identifiants invalides" });
     }
 
     // Vérifier le mot de passe
-    const isPasswordValid = await bcrypt.compare(password, User.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Identifiants invalides" });
     }
 
     // TODO: Générer un token JWT ici
-    const { password: _, ...userWithoutPassword } = User;
+    const { password: _, ...userWithoutPassword } = user;
 
     return res.status(200).json({
       message: "Connexion réussie",
-      User: userWithoutPassword,
+      user: userWithoutPassword,
     });
 
   } catch (err) {
