@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 
 export class UserController {
     static getAllUsers = CoreController.handle(async (req, res) => {
-        const users = await prisma.user.findMany({
+        const Users = await prisma.User.findMany({
             select: {
                 user_id: true,
                 name: true,
@@ -16,17 +16,17 @@ export class UserController {
                 address: true,
             },
         });
-        res.json(users);
+        res.json(Users);
     });
 
     static getUserById = CoreController.handle(async (req, res) => {
         const id = Number(req.params.id);
         if (!id) throw new BadRequestError("ID invalide");
 
-        const user = await prisma.user.findUnique({ where: { user_id: id } });
-        if (!user) throw new NotFoundError("Utilisateur introuvable");
+        const User = await prisma.user.findUnique({ where: { user_id: id } });
+        if (!User) throw new NotFoundError("Utilisateur introuvable");
 
-        const { password, ...safeUser } = user;
+        const { password, ...safeUser } = User;
         res.json(safeUser);
     });
 
@@ -64,12 +64,12 @@ export class UserController {
             req.body.password = await bcrypt.hash(req.body.password, 10);
         }
 
-        const user = await prisma.user.update({
+        const User = await prisma.user.update({
             where: { user_id: id },
             data: req.body,
         });
 
-        const { password, ...safeUser } = user;
+        const { password, ...safeUser } = User;
         res.json(safeUser);
     });
 
