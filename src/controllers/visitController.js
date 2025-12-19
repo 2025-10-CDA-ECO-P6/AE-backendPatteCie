@@ -33,49 +33,37 @@ export class VisitController {
     });
 
     // Créer une visite
-    static createVisit = CoreController.handle(async (req, res) => {
-        const { date, reason, comments, diagnosis, treatment_id, user_ids } = req.body;
+   static createVisit = CoreController.handle(async (req, res) => {
+  const { date, reason, comments, diagnosis, treatment_id } = req.body;
 
-        // Validation des champs obligatoires
-        if (!date || !reason || !comments || !treatment_id) {
-        throw new BadRequestError("Champs obligatoires manquants");
-        }
+  if (!date || !reason || !comments || !treatment_id) {
+    throw new BadRequestError("Champs obligatoires manquants");
+  }
 
-        // Création de la visite
-        const visit = await prisma.visit.create({
-        data: {
-            date: new Date(date),
-            reason,
-            comments,
-            diagnosis: diagnosis ?? null,
-            Treatment: {
-            connect: { treatment_id }, // <- ici on connecte le traitement existant
-            },
-            UserVisit: {
-            create: user_ids.map(user_id => ({ user_id })),
-            },
-        },
-        });
+  // Vérifie que le traitement existe
+  const treatment = await prisma.treatment.findUnique({ where: { treatment_id } });
+  if (!treatment) throw new BadRequestError("Traitement introuvable");
 
-        // Si des utilisateurs sont fournis, création des entrées dans la table pivot
-        if (Array.isArray(user_ids) && user_ids.length > 0) {
-        await prisma.userVisit.createMany({
-            data: user_ids.map(user_id => ({ visit_id: visit.visit_id, user_id })),
-            skipDuplicates: true, // évite les doublons si user_id existe déjà pour cette visite
-        });
-        }
+  // Crée la visite
+  const visit = await prisma.visit.create({
+    data: {
+      date: new Date(date),
+      reason,
+      comments,
+      diagnosis: diagnosis ?? null,
+      treatment_id,
+    },
+  });
 
-        // Récupération de la visite avec les utilisateurs et le traitement
-        const visitWithUsers = await prisma.visit.findUnique({
-        where: { visit_id: visit.visit_id },
-        include: {
-            UserVisit: { include: { User: true } },
-            Treatment: true,
-        },
-        });
+  // Récupère la visite avec le traitement inclus
+  const visitWithRelations = await prisma.visit.findUnique({
+    where: { visit_id: visit.visit_id },
+    include: { Treatment: true },
+  });
 
-        res.status(201).json(visitWithUsers);
-    });
+  res.status(201).json(visitWithRelations);
+});
+
 
     // Mettre à jour une visite
     static updateVisit = CoreController.handle(async (req, res) => {
