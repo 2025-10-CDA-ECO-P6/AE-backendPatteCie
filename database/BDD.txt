@@ -18,7 +18,7 @@ CREATE TABLE "User" (
 );
 
 -- TABLE ANIMAL
-CREATE TABLE Animal (
+CREATE TABLE "Animal" (
     animal_id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     sex CHAR(1) NOT NULL,
@@ -33,14 +33,14 @@ CREATE TABLE Animal (
 );
 
 -- TABLE USER_ANIMAL
-CREATE TABLE UserAnimal (
+CREATE TABLE "UserAnimal" (
     user_animal_id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES "User"(user_id) ON DELETE CASCADE,
-    animal_id INTEGER NOT NULL REFERENCES Animal(animal_id) ON DELETE CASCADE
+    animal_id INTEGER NOT NULL REFERENCES "Animal"(animal_id) ON DELETE CASCADE
 );
 
 -- TABLE TREATMENT
-CREATE TABLE Treatment (
+CREATE TABLE "Treatment" (
     treatment_id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     date_start DATE NOT NULL,
@@ -50,19 +50,19 @@ CREATE TABLE Treatment (
 );
 
 -- TABLE VISIT
-CREATE TABLE Visit (
+CREATE TABLE "Visit" (
     visit_id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES "User"(user_id) ON DELETE CASCADE,
     date TIMESTAMP NOT NULL,
     reason VARCHAR(200) NOT NULL,
     comments TEXT NOT NULL,
     diagnosis TEXT,
-    treatment_id INTEGER NOT NULL REFERENCES Treatment(treatment_id) ON DELETE CASCADE
+    treatment_id INTEGER NOT NULL REFERENCES "Treatment"(treatment_id) ON DELETE CASCADE
 );
 
 -- TABLE TREATMENT_VISIT
-CREATE TABLE TreatmentVisit (
+CREATE TABLE "TreatmentVisit" (
     treatment_visit_id SERIAL PRIMARY KEY,
-    visit_id INTEGER NOT NULL REFERENCES Visit(visit_id) ON DELETE CASCADE,
-    treatment_id INTEGER NOT NULL REFERENCES Treatment(treatment_id) ON DELETE CASCADE
+    visit_id INTEGER NOT NULL REFERENCES "Visit"(visit_id) ON DELETE CASCADE,
+    treatment_id INTEGER NOT NULL REFERENCES "Treatment"(treatment_id) ON DELETE CASCADE
 );
