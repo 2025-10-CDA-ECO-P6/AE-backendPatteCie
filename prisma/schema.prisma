@@ -7,19 +7,53 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model TreatmentVisit {
+  treatment_visit_id Int @id @default(autoincrement())
+  visit_id           Int
+  treatment_id       Int
+}
+
 model User {
-  user_id    Int          @id @default(autoincrement())
-  uuid       String?      @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name       String       @db.VarChar(50)
-  first_name String       @db.VarChar(50)
-  phone      String?      @db.VarChar(20)
-  email      String       @unique @db.VarChar(100)
-  password   String       @db.VarChar(255)
-  address    String?      @db.VarChar(255)
-  role       String       @db.VarChar(100)
-  created_at DateTime?    @default(now()) @db.Timestamp(6)
-  UserAnimal UserAnimal[]
-  Visit      Visit[]
+  user_id    Int         @id @default(autoincrement())
+  uuid       String?     @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String      @db.VarChar(50)
+  first_name String      @db.VarChar(50)
+  phone      String?     @db.VarChar(20)
+  email      String      @unique @db.VarChar(100)
+  password   String      @db.VarChar(255)
+  address    String?     @db.VarChar(255)
+  role       String      @db.VarChar(100)
+  created_at DateTime?   @default(now()) @db.Timestamp(6)
+  UserVisit  UserVisit[]
+}
+
+model Visit {
+  visit_id     Int         @id @default(autoincrement())
+  date         DateTime    @db.Timestamp(6)
+  reason       String      @db.VarChar(200)
+  comments     String
+  diagnosis    String?
+  treatment_id Int
+  UserVisit    UserVisit[]
+  Treatment    Treatment   @relation(fields: [treatment_id], references: [treatment_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model UserVisit {
+  user_visit_id Int   @id @default(autoincrement())
+  user_id       Int
+  visit_id      Int
+  User          User  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  Visit         Visit @relation(fields: [visit_id], references: [visit_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model Treatment {
+  treatment_id Int      @id @default(autoincrement())
+  name         String   @db.VarChar(50)
+  date_start   DateTime @db.Date
+  date_end     DateTime @db.Date
+  reason       String
+  comments     String
+  visits       Visit[]
 }
 
 model Animal {
@@ -37,42 +71,9 @@ model Animal {
   UserAnimal    UserAnimal[]
 }
 
-model Treatment {
-  treatment_id   Int              @id @default(autoincrement())
-  name           String           @db.VarChar(50)
-  date_start     DateTime         @db.Date
-  date_end       DateTime         @db.Date
-  reason         String
-  comments       String
-  TreatmentVisit TreatmentVisit[]
-  Visit          Visit[]
-}
-
-model TreatmentVisit {
-  treatment_visit_id Int       @id @default(autoincrement())
-  visit_id           Int
-  treatment_id       Int
-  Treatment          Treatment @relation(fields: [treatment_id], references: [treatment_id], onDelete: Cascade, onUpdate: NoAction)
-  Visit              Visit     @relation(fields: [visit_id], references: [visit_id], onDelete: Cascade, onUpdate: NoAction)
-}
-
 model UserAnimal {
   user_animal_id Int    @id @default(autoincrement())
   user_id        Int
   animal_id      Int
   Animal         Animal @relation(fields: [animal_id], references: [animal_id], onDelete: Cascade, onUpdate: NoAction)
-  User           User   @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
-}
-
-model Visit {
-  visit_id       Int              @id @default(autoincrement())
-  user_id        Int
-  date           DateTime         @db.Timestamp(6)
-  reason         String           @db.VarChar(200)
-  comments       String
-  diagnosis      String?
-  treatment_id   Int
-  TreatmentVisit TreatmentVisit[]
-  Treatment      Treatment        @relation(fields: [treatment_id], references: [treatment_id], onDelete: Cascade, onUpdate: NoAction)
-  User           User             @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
 }
