@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { prisma } from "../prisma.js";
 
 export const registerUser = async (req, res) => {
@@ -20,8 +20,8 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // 2️⃣ Vérification email unique
-    const existingUser = await prisma.user.findUnique({
+    // Vérification email unique
+    const existingUser = await prisma.User.findUnique({
       where: { email },
     });
 
@@ -31,11 +31,11 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // 3️⃣ Hash du mot de passe
+    // Hash du mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 4️⃣ Création utilisateur
-    const user = await prisma.user.create({
+    // Création utilisateur
+    const user = await prisma.User.create({
       data: {
         name,
         first_name,
@@ -47,7 +47,7 @@ export const registerUser = async (req, res) => {
       },
     });
 
-    // 5️⃣ Réponse sans le mot de passe
+    // Réponse sans le mot de passe
     const { password: _, ...userWithoutPassword } = user;
 
     return res.status(201).json({
@@ -79,7 +79,7 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Email et mot de passe requis" });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.User.findUnique({
       where: { email }
     });
 
