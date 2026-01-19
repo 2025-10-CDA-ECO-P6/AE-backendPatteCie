@@ -1,5 +1,9 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../prisma.js";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const registerUser = async (req, res) => {
   try {
@@ -94,12 +98,25 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Identifiants invalides" });
     }
 
-    // TODO: Générer un token JWT ici
+    // Générer le token JWT
+    const token = jwt.sign(
+      {
+        user_id: user.user_id,
+        email: user.email,
+        role: user.role, // optionnel si tu as des rôles
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d", // durée au choix
+      }
+    );
+
     const { password: _, ...userWithoutPassword } = user;
 
     return res.status(200).json({
       message: "Connexion réussie",
       user: userWithoutPassword,
+      token,
     });
 
   } catch (err) {
