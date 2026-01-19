@@ -32,14 +32,14 @@ export class UserController {
 
     static createUser = CoreController.handle(async (req, res) => {
         const { name, first_name, email, password, role, phone, address } = req.body;
-
+    
         if (!name || !first_name || !email || !password || !role) {
             throw new BadRequestError("Champs obligatoires manquants");
         }
-
+    
         // Hasher le MDP
         const hashedPassword = await bcrypt.hash(password, 10);
-
+    
         const user = await prisma.user.upsert({
             where: { email },
             update: {},
@@ -54,6 +54,9 @@ export class UserController {
             },
         });
 
+        const { password: _, ...safeUser } = user;
+        res.status(201).json(safeUser);
+    });
         const { password: _, ...safeUser } = user;
         res.status(201).json(safeUser);
     });
