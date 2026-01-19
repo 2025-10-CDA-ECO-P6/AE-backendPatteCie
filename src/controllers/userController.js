@@ -57,9 +57,6 @@ export class UserController {
         const { password: _, ...safeUser } = user;
         res.status(201).json(safeUser);
     });
-        const { password: _, ...safeUser } = user;
-        res.status(201).json(safeUser);
-    });
 
     static updateUser = CoreController.handle(async (req, res) => {
         const id = Number(req.params.id);
