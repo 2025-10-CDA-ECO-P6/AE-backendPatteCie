@@ -29,6 +29,7 @@ model User {
   treatedAnimals Animal[]    @relation("VeterinarianAnimals")
   myAnimals      Animal[]    @relation("UserAnimals")
   visitUsers     VisitUser[]
+  userAnimals UserAnimal[]
 }
 
 model Visit {
@@ -69,10 +70,11 @@ model Animal {
   color         String   @db.VarChar(50)
   sterilizes    Boolean
   chip_number   Int
-  photo         String   @db.VarChar(255)
-  owner_id      Int
+  photo         String?   @db.VarChar(255)
+  owner_id      Int?
   owner         User[]   @relation("UserAnimals")
   veterinarians User[]   @relation("VeterinarianAnimals")
+  userAnimals UserAnimal[]
 }
 
 model VisitUser {
@@ -83,4 +85,15 @@ model VisitUser {
   user  User?  @relation(fields: [user_id], references: [user_id])
 
   @@id([visit_id, user_id])
+}
+
+model UserAnimal {
+  user_id   Int
+  animal_id Int
+  role      String   // "OWNER" | "VETERINARIAN"
+
+  user   User   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  animal Animal @relation(fields: [animal_id], references: [animal_id], onDelete: Cascade)
+
+  @@id([user_id, animal_id])
 }
