@@ -37,7 +37,6 @@ export class UserController {
             throw new BadRequestError("Champs obligatoires manquants");
         }
     
-        // Hasher le MDP
         const hashedPassword = await bcrypt.hash(password, 10);
     
         const user = await prisma.user.upsert({
