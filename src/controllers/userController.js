@@ -30,31 +30,33 @@ export class UserController {
         res.json(safeUser);
     });
 
-    // static createUser = CoreController.handle(async (req, res) => {
-    //     const { name, first_name, email, password, role, phone, address } = req.body;
-    //
-    //     if (!name || !first_name || !email || !password || !role) {
-    //         throw new BadRequestError("Champs obligatoires manquants");
-    //     }
-    //
-    //     // Hasher le MDP
-    //     const hashedPassword = await bcrypt.hash(password, 10);
-    //
-    //     const user = await prisma.user.create({
-    //         data: {
-    //             name,
-    //             first_name,
-    //             email,
-    //             password: hashedPassword,
-    //             role,
-    //             phone: phone ?? null,
-    //             address: address ?? null,
-    //         },
-    //     });
+    static createUser = CoreController.handle(async (req, res) => {
+        const { name, first_name, email, password, role, phone, address } = req.body;
 
-    //     const { password: _, ...safeUser } = user;
-    //     res.status(201).json(safeUser);
-    // });
+        if (!name || !first_name || !email || !password || !role) {
+            throw new BadRequestError("Champs obligatoires manquants");
+        }
+
+        // Hasher le MDP
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const user = await prisma.user.upsert({
+            where: { email },
+            update: {},
+            create: {
+                name,
+                first_name,
+                email,
+                password: hashedPassword,
+                role,
+                phone: phone ?? null,
+                address: address ?? null,
+            },
+        });
+
+        const { password: _, ...safeUser } = user;
+        res.status(201).json(safeUser);
+    });
 
     static updateUser = CoreController.handle(async (req, res) => {
         const id = Number(req.params.id);
