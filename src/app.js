@@ -5,8 +5,16 @@ import userRoute from "./routes/userRoute.js";
 import animalRoute from "./routes/animalRoute.js";
 import visitRoute from "./routes/visitRoute.js";
 import treatmentRoute from "./routes/treatmentRoute.js";
+import cors from "cors";
 
 const app = express();
+
+app.use(cors({
+  origin: "http://localhost:3001",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+}));
 
 app.use(express.json());
 
