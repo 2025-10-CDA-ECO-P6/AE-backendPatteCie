@@ -34,26 +34,15 @@ export class AnimalController {
   });
 
   static getMyAnimals = CoreController.handle(async (req, res) => {
-    const ownerId = req.user.user_id;
+    const ownerId = req.user?.user_id;
+
+    if (!ownerId) {
+      throw new Error("Utilisateur non authentifié");
+    }
 
     const animals = await prisma.animal.findMany({
       where: {
-        userAnimals: {
-          some: {
-            user_id: ownerId,
-            role: "OWNER",
-          },
-        },
-      },
-      select: {
-        animal_id: true,
-        name: true,
-        species: true,
-        race: true,
-        sex: true,
-        weight_kg: true,
-        color: true,
-        photo: true,
+        owner_id: ownerId,
       },
     });
 

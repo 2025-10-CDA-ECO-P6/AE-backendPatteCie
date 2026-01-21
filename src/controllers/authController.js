@@ -111,6 +111,12 @@ export const loginUser = async (req, res) => {
       }
     );
 
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000, 
+    });
+
     const { password: _, ...userWithoutPassword } = user;
 
     return res.status(200).json({
@@ -126,5 +132,10 @@ export const loginUser = async (req, res) => {
 };
 
 export const logoutUser = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "strict",
+  });
+
   return res.status(200).json({ message: "Déconnexion réussie" });
 };
