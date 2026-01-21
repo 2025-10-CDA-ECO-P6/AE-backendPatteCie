@@ -33,6 +33,32 @@ export class AnimalController {
     res.json(animal);
   });
 
+  static getMyAnimals = CoreController.handle(async (req, res) => {
+    const ownerId = req.user.user_id;
+
+    const animals = await prisma.animal.findMany({
+      where: {
+        userAnimals: {
+          some: {
+            user_id: ownerId,
+            role: "OWNER",
+          },
+        },
+      },
+      select: {
+        animal_id: true,
+        name: true,
+        species: true,
+        race: true,
+        sex: true,
+        weight_kg: true,
+        color: true,
+        photo: true,
+      },
+    });
+
+    res.json(animals);
+  });
   // static createAnimal = CoreController.handle(async (req, res) => {
   //     const veterinarianId = req.user.user_id;
   //     const {
