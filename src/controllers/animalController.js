@@ -26,6 +26,14 @@ export class AnimalController {
 
     const animal = await prisma.animal.findUnique({
       where: { animal_id: id },
+      include: {
+        visits: {
+          include: {
+            treatments: true,
+            vaccines: true,
+          },
+        },
+      },
     });
 
     if (!animal) throw new NotFoundError("Animal introuvable");
@@ -44,60 +52,86 @@ export class AnimalController {
       where: {
         owner_id: ownerId,
       },
+      include: {
+        visits: {
+          include: {
+            treatments: true,
+            vaccines: true,
+          },
+        },
+      },
     });
 
     res.json(animals);
   });
-  // static createAnimal = CoreController.handle(async (req, res) => {
-  //     const veterinarianId = req.user.user_id;
-  //     const {
-  //         name,
-  //         sex,
-  //         date_of_birth,
-  //         species,
-  //         race,
-  //         weight_kg,
-  //         color,
-  //         sterilizes,
-  //         chip_number,
-  //         photo,
-  //         owner_id,
-  //     } = req.body;
 
-  //     if (
-  //         !name ||
-  //         !sex ||
-  //         !date_of_birth ||
-  //         !species ||
-  //         !race ||
-  //         !weight_kg ||
-  //         !color ||
-  //         sterilizes === undefined ||
-  //         !chip_number
-  //     ) {
-  //         throw new BadRequestError("Champs obligatoires manquants");
-  //     }
+  static getAnimalsByUserId = CoreController.handle(async (req, res) => {
+    const ownerId = Number(req.params.id);
+    if (!ownerId) throw new BadRequestError("ID invalide");
 
-  //     const animal = await prisma.animal.create({
-  //         data: {
-  //             name,
-  //             sex,
-  //             date_of_birth: new Date(date_of_birth),
-  //             species,
-  //             race,
-  //             weight_kg,
-  //             color,
-  //             sterilizes,
-  //             chip_number,
-  //             photo: photo ?? null,
-  //         },
-  //     });
+    const owner = await prisma.user.findUnique({
+      where: { user_id: ownerId },
+    });
+    if (!owner) throw new NotFoundError("Utilisateur introuvable");
 
-  //     res.status(201).json(animal);
-  // });
+    const animals = await prisma.animal.findMany({
+      where: {
+        owner_id: ownerId,
+      },
+    });
+
+    res.json(animals);
+  });
 
   static createAnimal = CoreController.handle(async (req, res) => {
-    const veterinarianId = req.user.user_id; // vétérinaire connecté
+      const veterinarianId = req.user.user_id;
+      const {
+          name,
+          sex,
+          date_of_birth,
+          species,
+          race,
+          weight_kg,
+          color,
+          sterilizes,
+          chip_number,
+          photo,
+          owner_id,
+      } = req.body;
+
+      if (
+          !name ||
+          !sex ||
+          !date_of_birth ||
+          !species ||
+          !race ||
+          !weight_kg ||
+          !color ||
+          sterilizes === undefined ||
+          !chip_number
+      ) {
+          throw new BadRequestError("Champs obligatoires manquants");
+      }
+
+      const animal = await prisma.animal.create({
+          data: {
+              name,
+              sex,
+              date_of_birth: new Date(date_of_birth),
+              species,
+              race,
+              weight_kg,
+              color,
+              sterilizes,
+              chip_number,
+              photo: photo ?? null,
+          },
+      });
+
+      res.status(201).json(animal);
+  });
+
+  static createAnimal = CoreController.handle(async (req, res) => {
     const {
       name,
       sex,
@@ -112,6 +146,8 @@ export class AnimalController {
       owner_id,
     } = req.body;
 
+    const ownerId = owner_id ? Number(owner_id) : req.user?.user_id;
+
     if (
       !name ||
       !sex ||
@@ -121,59 +157,33 @@ export class AnimalController {
       !weight_kg ||
       !color ||
       sterilizes === undefined ||
-      !chip_number
+      !chip_number ||
+      !ownerId
     ) {
       throw new BadRequestError("Champs obligatoires manquants");
     }
 
-    // Transaction pour créer l'animal et les liaisons
-    const newAnimal = await prisma.$transaction(async (tx) => {
-      // 1️⃣ Créer l'animal
-      const animal = await tx.animal.create({
-        data: {
-          name,
-          sex,
-          date_of_birth: new Date(date_of_birth),
-          species,
-          race,
-          weight_kg,
-          color,
-          sterilizes,
-          chip_number: parseInt(chip_number, 10),
-          photo: photo ?? null,
-          owner_id: owner_id ?? null,
-        },
-      });
+    const owner = await prisma.user.findUnique({
+      where: { user_id: ownerId },
+    });
+    if (!owner) {
+      throw new BadRequestError("Owner introuvable");
+    }
 
-      // 2️⃣ Lier le vétérinaire connecté
-      await tx.userAnimal.create({
-        data: {
-          user_id: veterinarianId,
-          animal_id: animal.animal_id,
-          role: "VETERINARIAN",
-        },
-      });
-
-      // 3️⃣ Lier un owner si fourni
-      if (owner_id) {
-        // vérifier que le user existe
-        const owner = await tx.user.findUnique({
-          where: { user_id: owner_id },
-        });
-        if (!owner) {
-          throw new BadRequestError("Owner introuvable");
-        }
-
-        await tx.userAnimal.create({
-          data: {
-            user_id: owner_id,
-            animal_id: animal.animal_id,
-            role: "OWNER",
-          },
-        });
-      }
-
-      return animal;
+    const newAnimal = await prisma.animal.create({
+      data: {
+        name,
+        sex,
+        date_of_birth: new Date(date_of_birth),
+        species,
+        race,
+        weight_kg,
+        color,
+        sterilizes,
+        chip_number: parseInt(chip_number, 10),
+        photo: photo ?? null,
+        owner_id: ownerId,
+      },
     });
 
     res.status(201).json(newAnimal);
@@ -205,4 +215,38 @@ export class AnimalController {
 
     res.json({ message: "Animal supprimé" });
   });
+
+  //  static getVisits = CoreController.handle(async (req, res) => {
+  //   const animalId = Number(req.params.id);
+
+  //   if (!animalId) return res.status(400).json({ error: "Animal ID requis" });
+
+  //   const animal = await prisma.animal.findUnique({
+  //     where: { animal_id: animalId },
+  //     include: { visits: { include: { treatments: true, vaccines: true } } },
+  //   });
+
+  //   if (!animal) return res.status(404).json({ error: "Animal introuvable" });
+
+  //   res.json(animal.visits);
+  // });
+
+  // // Récupérer tous les traitements d'un animal
+  // static getTreatments = CoreController.handle(async (req, res) => {
+  //   const animalId = Number(req.params.id);
+
+  //   if (!animalId) return res.status(400).json({ error: "Animal ID requis" });
+
+  //   const animal = await prisma.animal.findUnique({
+  //     where: { animal_id: animalId },
+  //     include: { visits: { include: { treatments: true } } },
+  //   });
+
+  //   if (!animal) return res.status(404).json({ error: "Animal introuvable" });
+
+  //   // 🔹 Récupère tous les traitements de toutes les visites
+  //   const treatments = animal.visits.flatMap((v) => v.treatments);
+
+  //   res.json(treatments);
+  // });
 }

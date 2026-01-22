@@ -147,4 +147,5 @@ export class VisitController {
 
     res.json({ message: "Visite supprimée" });
   });
+
 }
