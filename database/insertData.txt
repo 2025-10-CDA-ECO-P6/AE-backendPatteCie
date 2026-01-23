@@ -1,0 +1,44 @@
+-- insertData - Example data set (INSERT)
+
+-- USERS
+INSERT INTO "User" (user_id, name, first_name, phone, email, password, address, role)
+VALUES
+    (1, 'Dupont', 'Jean', '0612345678', 'jean.dupont@mail.com', 'motdepasse1', '12 rue des Lilas, Paris', 'client'),
+    (2, 'Martin', 'Claire', '0698765432', 'claire.martin@mail.com', 'motdepasse2', '5 avenue Victor Hugo, Lyon', 'client'),
+    (3, 'Durand', 'Alice', '0611223344', 'alice.durand@pattec.ie', 'motdepasse3', '10 rue de la Clinique, Paris', 'veterinaire');
+
+-- ANIMALS
+INSERT INTO "Animal" (
+    animal_id, name, sex, date_of_birth, species, race,
+    weight_kg, color, sterilizes, chip_number, photo, owner_id
+)
+VALUES
+    (1, 'Rex', 'M', '2018-05-10', 'Chien', 'Labrador', 30, 'Noir', true, 123456, 'rex.jpg', 1),
+    (2, 'Mina', 'F', '2020-08-22', 'Chat', 'Européen', 5, 'Blanc', false, 654321, 'mina.jpg', 2),
+    (3, 'Max', 'M', '2019-03-15', 'Chien', 'Berger Allemand', 35, 'Marron', true, 789012, 'max.jpg', 1);
+
+-- VISITS
+INSERT INTO "Visit" (
+    visit_id, date, reason, comments, diagnosis, animal_id
+)
+VALUES
+    (1, '2024-01-10 10:30:00', 'Vaccination annuelle', 'Tout est OK', 'Animal en bonne santé', 1),
+    (2, '2024-02-01 14:00:00', 'Consultation infection', 'Léger mieux', 'Infection cutanée', 2),
+    (3, '2024-03-05 09:15:00', 'Consultation de routine', 'Comportement normal', 'RAS', 3);
+
+-- TREATMENTS
+INSERT INTO "Treatment" (
+    treatment_id, name, date_start, date_end, reason, comments, visit_id
+)
+VALUES
+    (1, 'Vaccination', '2024-01-10', '2024-01-10', 'Vaccin annuel', 'RAS', 1),
+    (2, 'Antibiotiques', '2024-02-01', '2024-02-10', 'Infection', 'Traitement à surveiller', 2),
+    (3, 'Vermifuge', '2024-03-05', '2024-03-05', 'Traitement préventif', 'À renouveler dans 3 mois', 3);
+
+-- VACCINES
+INSERT INTO "Vaccine" (
+    vaccine_id, name, date, notes, visit_id
+)
+VALUES
+    (1, 'Rage', '2024-01-10', 'Rappel annuel', 1),
+    (2, 'Typhus', '2024-03-05', NULL, 3);

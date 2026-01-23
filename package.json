@@ -1,0 +1,54 @@
+{
+  "name": "backendpatteandcie",
+  "version": "1.0.0",
+  "description": "Backend Patte & Cie",
+  "main": "src/server.js",
+  "type": "module",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "seed": "node prisma/seed.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "@prisma/adapter-neon": "^7.1.0",
+    "@prisma/client": "^6.19.1",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.16.3",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.3",
+    "prisma": "^6.19.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/2025-10-CDA-ECO-P6/AE-backendPatteCie.git"
+  },
+  "keywords": [
+    "backend",
+    "api",
+    "express",
+    "prisma",
+    "neon"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/2025-10-CDA-ECO-P6/AE-backendPatteCie/issues"
+  },
+  "homepage": "https://github.com/2025-10-CDA-ECO-P6/AE-backendPatteCie#readme"
+}
