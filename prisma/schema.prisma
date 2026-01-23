@@ -7,56 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model TreatmentVisit {
-  treatment_visit_id Int @id @default(autoincrement())
-  visit_id           Int
-  treatment_id       Int
-}
-
 model User {
-  user_id        Int         @id @default(autoincrement())
-  uuid           String?     @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name           String      @db.VarChar(50)
-  first_name     String      @db.VarChar(50)
-  phone          String?     @db.VarChar(20)
-  email          String      @unique @db.VarChar(100)
-  password       String      @db.VarChar(255)
-  address        String?     @db.VarChar(255)
-  role           String      @db.VarChar(100)
-  created_at     DateTime?   @default(now()) @db.Timestamp(6)
-  ownerVisits    Visit[]     @relation("ownerVisits")
-  vetVisits      Visit[]     @relation("vetVisits")
-  treatedAnimals Animal[]    @relation("VeterinarianAnimals")
-  myAnimals      Animal[]    @relation("UserAnimals")
-  visitUsers     VisitUser[]
-  userAnimals UserAnimal[]
-}
+  user_id    Int       @id @default(autoincrement())
+  uuid       String?   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String    @db.VarChar(50)
+  first_name String    @db.VarChar(50)
+  phone      String?   @db.VarChar(20)
+  email      String    @unique @db.VarChar(100)
+  password   String    @db.VarChar(255)
+  address    String?   @db.VarChar(255)
+  role       String    @db.VarChar(100)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
 
-model Visit {
-  visit_id  Int      @id @default(autoincrement())
-  date      DateTime @db.Timestamp(6)
-  reason    String   @db.VarChar(200)
-  comments  String
-  diagnosis String?
-
-  vaterinarian_id       Int
-  veterinarian          User?       @relation("vetVisits", fields: [vaterinarian_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
-  owner_id              Int
-  owner                 User?       @relation("ownerVisits", fields: [owner_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
-  treatment_id          Int
-  treatment             Treatment?  @relation(fields: [treatmentTreatment_id], references: [treatment_id])
-  treatmentTreatment_id Int?
-  visitUsers            VisitUser[]
-}
-
-model Treatment {
-  treatment_id Int      @id @default(autoincrement())
-  name         String   @db.VarChar(50)
-  date_start   DateTime @db.Date
-  date_end     DateTime @db.Date
-  reason       String
-  comments     String
-  visits       Visit[]
+  animals Animal[]
 }
 
 model Animal {
@@ -70,30 +33,46 @@ model Animal {
   color         String   @db.VarChar(50)
   sterilizes    Boolean
   chip_number   Int
-  photo         String?   @db.VarChar(255)
-  owner_id      Int?
-  owner         User[]   @relation("UserAnimals")
-  veterinarians User[]   @relation("VeterinarianAnimals")
-  userAnimals UserAnimal[]
+  photo         String?  @db.VarChar(255)
+
+  owner_id Int
+  owner    User @relation(fields: [owner_id], references: [user_id], onDelete: Cascade)
+
+  visits Visit[]
 }
 
-model VisitUser {
-  visit_id Int
-  user_id  Int
+model Visit {
+  visit_id  Int      @id @default(autoincrement())
+  date      DateTime @db.Timestamp(6)
+  reason    String   @db.VarChar(200)
+  comments  String
+  diagnosis String?
 
-  visit Visit? @relation(fields: [visit_id], references: [visit_id])
-  user  User?  @relation(fields: [user_id], references: [user_id])
-
-  @@id([visit_id, user_id])
-}
-
-model UserAnimal {
-  user_id   Int
   animal_id Int
-  role      String   // "OWNER" | "VETERINARIAN"
+  animal    Animal @relation(fields: [animal_id], references: [animal_id], onDelete: Cascade)
 
-  user   User   @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
-  animal Animal @relation(fields: [animal_id], references: [animal_id], onDelete: Cascade)
+  treatments Treatment[]
+  vaccines   Vaccine[]
+}
 
-  @@id([user_id, animal_id])
+model Treatment {
+  treatment_id Int      @id @default(autoincrement())
+  name         String   @db.VarChar(50)
+  date_start   DateTime @db.Date
+  date_end     DateTime @db.Date
+  reason       String
+  comments     String
+
+  visit_id Int
+  visit    Visit @relation(fields: [visit_id], references: [visit_id], onDelete: Cascade)
+}
+
+model Vaccine {
+  vaccine_id Int      @id @default(autoincrement())
+  name       String   @db.VarChar(100)
+  date       DateTime @db.Date
+  notes      String?  @db.VarChar(255)
+
+  visit_id Int
+  visit    Visit @relation(fields: [visit_id], references: [visit_id], onDelete: Cascade)
 }

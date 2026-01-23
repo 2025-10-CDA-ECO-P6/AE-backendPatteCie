@@ -6,11 +6,15 @@ import animalRoute from "./routes/animalRoute.js";
 import visitRoute from "./routes/visitRoute.js";
 import treatmentRoute from "./routes/treatmentRoute.js";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+
 
 const app = express();
 
+app.use(cookieParser());
+
 app.use(cors({
-  origin: "http://localhost:3001",
+  origin: "http://localhost:3000",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
