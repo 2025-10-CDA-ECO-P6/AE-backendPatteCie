@@ -58,7 +58,6 @@ Le script SQL inclut :
 insertData.txt inclut un exemple de donnée :
 - Jeu de données d'exemple (INSERT)
 
-
 ### Modèles principaux
 
 - **User** : Utilisateurs (propriétaires, vétérinaires)
@@ -193,6 +192,11 @@ Le serveur démarre sur `http://localhost:4000` par défaut.
 | POST | `/` | Crée un nouveau traitement | Non |
 | PUT | `/:id` | Met à jour un traitement | Non |
 | DELETE | `/:id` | Supprime un traitement | Non |
+
+
+## Documentation des routes de l'api :
+
+http://localhost:4000/api-docs/
 
 ## 🔐 Authentification
 
