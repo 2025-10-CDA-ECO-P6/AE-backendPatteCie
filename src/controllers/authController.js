@@ -142,3 +142,30 @@ export const logoutUser = (req, res) => {
 
   return res.status(200).json({ message: "Déconnexion réussie" });
 };
+
+// controllers/authController.js
+export const getMe = async (req, res) => {
+  try {
+    const user = await prisma.User.findUnique({
+      where: { user_id: req.user.user_id },
+      select: {
+        user_id: true,
+        name: true,
+        first_name: true,
+        email: true,
+        role: true,
+        phone: true,
+        address: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur introuvable" });
+    }
+
+    res.status(200).json({ user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
