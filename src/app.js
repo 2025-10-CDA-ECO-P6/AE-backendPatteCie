@@ -7,6 +7,8 @@ import visitRoute from "./routes/visitRoute.js";
 import treatmentRoute from "./routes/treatmentRoute.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "../swagger.js";
 
 
 const app = express();
@@ -21,6 +23,8 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
